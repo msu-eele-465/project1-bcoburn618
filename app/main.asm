@@ -3,7 +3,10 @@
 ; EELE 465
 ; 1/21/2025
 ; Project 1: Heartbeat LED
-; Description:
+; Description: In this program LED 1 (P1.0) is toggled every one second
+; when a subroutine named wait is called.  Within that subroutine, a delay
+; of 50,000 is executed then repeated 7 times to obtain the desired pulse of
+; one second on and one second off.
 ;------------------------------------------------------------------------
 
 ; --COPYRIGHT--,BSD_EX
@@ -90,8 +93,8 @@ SetupP1     bic.b   #BIT0,&P1OUT            ; Clear P1.0 output
             bic.w   #LOCKLPM5,&PM5CTL0       ; Unlock I/O pins
 
 Mainloop    xor.b   #BIT0,&P1OUT            ; Toggle P1.0 every 0.1s
-            mov.w   #7, R14
-            call #Wait                      ; Delay for 0.1s
+            mov.w   #7, R14                 ; set number of delay cycles
+            call    #Wait                   ; Call delay subroutine
             jmp     Mainloop                ; Again
             NOP
 
@@ -102,10 +105,9 @@ Wait
             mov.w   #50000,R15              ; Delay to R15
 L1          dec.w   R15                     ; Decrement R15
             jnz     L1                      ; Delay over?
-            dec.w   R14
-            jnz     Wait
+            dec.w   R14                     ; decrement cycle
+            jnz     Wait                    ; check if all cycles complete
             ret
-
 
 
 ;------------------------------------------------------------------------------
