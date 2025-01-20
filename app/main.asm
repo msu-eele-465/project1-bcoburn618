@@ -91,13 +91,13 @@ StopWDT     mov.w   #WDTPW+WDTHOLD,&WDTCTL  ; Stop WDT
 
 SetupP1     bic.b   #BIT0, &P1OUT            ; Clear P1.0 output
             bis.b   #BIT0, &P1DIR            ; P1.0 output
-SetupP6     bic.b   #BIT6, &P6OUT            ; Clear P6.6 output
+SetupP6     bis.b   #BIT6, &P6OUT            ; Clear P6.6 output
             bis.b   #BIT6, &P6DIR            ; Set P6.6 as output
 TimerSetup  bis.w	#TBCLR, &TB0CTL
 		    bis.w	#TBSSEL__ACLK, &TB0CTL
 		    bis.w	#MC__UP, &TB0CTL
 
-		    mov.w	#16384, &TB0CCR0
+		    mov.w	#32768, &TB0CCR0
 		    bis.w	#CCIE, &TB0CCTL0
 		    bic.w	#CCIFG, &TB0CCTL0
 		    bis.w	#GIE, SR
