@@ -88,9 +88,22 @@
 
 RESET       mov.w   #__STACK_END,SP         ; Initialize stack pointer
 StopWDT     mov.w   #WDTPW+WDTHOLD,&WDTCTL  ; Stop WDT
-SetupP1     bic.b   #BIT0,&P1OUT            ; Clear P1.0 output
-            bis.b   #BIT0,&P1DIR            ; P1.0 output
+
+SetupP1     bic.b   #BIT0, &P1OUT            ; Clear P1.0 output
+            bis.b   #BIT0, &P1DIR            ; P1.0 output
+SetupP6     bic.b   #BIT6, &P6OUT            ; Clear P6.6 output
+            bis.b   #BIT6, &P6DIR            ; Set P6.6 as output
+TimerSetup  bis.w	#TBCLR, &TB0CTL
+		    bis.w	#TBSSEL__ACLK, &TB0CTL
+		    bis.w	#MC__UP, &TB0CTL
+
+		    mov.w	#16384, &TB0CCR0
+		    bis.w	#CCIE, &TB0CCTL0
+		    bic.w	#CCIFG, &TB0CCTL0
+		    bis.w	#GIE, SR
+
             bic.w   #LOCKLPM5,&PM5CTL0       ; Unlock I/O pins
+
 
 Mainloop    xor.b   #BIT0,&P1OUT            ; Toggle P1.0 every 0.1s
             mov.w   #7, R14                 ; set number of delay cycles
@@ -108,11 +121,20 @@ L1          dec.w   R15                     ; Decrement R15
             dec.w   R14                     ; decrement cycle
             jnz     Wait                    ; check if all cycles complete
             ret
-
+;-------------------------------------------------------------------------------
+; Interrupt Service Routines
+;-------------------------------------------------------------------------------
+ISR_TB0_CCR0:
+		xor.b	#BIT6, &P6OUT
+		bic.w	#CCIFG, &TB0CCTL0
+		reti
 
 ;------------------------------------------------------------------------------
 ;           Interrupt Vectors
 ;------------------------------------------------------------------------------
             .sect   RESET_VECTOR            ; MSP430 RESET Vector
             .short  RESET                   ;
+
+            .sect	".int43"
+            .short	ISR_TB0_CCR0
             .end
