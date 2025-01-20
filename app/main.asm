@@ -6,7 +6,8 @@
 ; Description: In this program LED 1 (P1.0) is toggled every one second
 ; when a subroutine named wait is called.  Within that subroutine, a delay
 ; of 50,000 is executed then repeated 7 times to obtain the desired pulse of
-; one second on and one second off.
+; one second on and one second off.  Using an overflow timer and Timer B0 
+; ISR LED2 (P6.6) is toggled every one second to match the pattern of LED1
 ;------------------------------------------------------------------------
 
 ; --COPYRIGHT--,BSD_EX
@@ -91,13 +92,13 @@ StopWDT     mov.w   #WDTPW+WDTHOLD,&WDTCTL  ; Stop WDT
 
 SetupP1     bic.b   #BIT0, &P1OUT            ; Clear P1.0 output
             bis.b   #BIT0, &P1DIR            ; P1.0 output
-SetupP6     bic.b   #BIT6, &P6OUT            ; Clear P6.6 output
+SetupP6     bis.b   #BIT6, &P6OUT            ; Clear P6.6 output
             bis.b   #BIT6, &P6DIR            ; Set P6.6 as output
 TimerSetup  bis.w	#TBCLR, &TB0CTL
 		    bis.w	#TBSSEL__ACLK, &TB0CTL
 		    bis.w	#MC__UP, &TB0CTL
 
-		    mov.w	#16384, &TB0CCR0
+		    mov.w	#32767, &TB0CCR0
 		    bis.w	#CCIE, &TB0CCTL0
 		    bic.w	#CCIFG, &TB0CCTL0
 		    bis.w	#GIE, SR
